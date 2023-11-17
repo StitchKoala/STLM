@@ -1,5 +1,5 @@
 # STLM
-The code of paper:  STLM. The code will be released once accepted.
+The code of paper: A SAM-guided Two-stream Lightweight Model for Anomaly Detection. The complete code will be released once accepted.
 
 Visualization results
 <p float="center">

@@ -1,7 +1,23 @@
+import argparse
+import os
+import shutil
+import warnings
+import torch
+import torch.nn.functional as F
+from tensorboardX import SummaryWriter
+from torch.utils.data import DataLoader
+from constant import RESIZE_SHAPE, ALL_CATEGORY
+from data.mvtec_dataset import MVTecDataset
+from evalSTLM import evaluate
+from model.losses import cosine_similarity_loss, focal_loss, l1_loss
+from mob_sam import Batch_Sam,Batch_SamE,SegmentationNet
+from model.model_utils import ASPP, BasicBlock, l2_norm, make_layer
+
+warnings.filterwarnings("ignore")
 
 def train(args, category, rotate_90=False, random_rotate=0):
-    # Initialize
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # Initialize
     sam_checkpoint = "./weights/mobile_sam.pt"
     model_type = "vit_t"
     sam_mode = "train"
@@ -131,3 +147,93 @@ def train(args, category, rotate_90=False, random_rotate=0):
         if global_step >= args.steps:
             flag = False
             break
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--gpu_id", type=int, default=0)
+    parser.add_argument("--num_workers", type=int, default=16)
+
+    parser.add_argument("--mvtec_path", type=str, default="./datasets/mvtec/")
+    parser.add_argument("--dtd_path", type=str, default="./datasets/dtd/images/")
+    parser.add_argument("--checkpoint_path", type=str, default="./saved_model/")
+    parser.add_argument("--run_name_head", type=str, default="STLM")
+    parser.add_argument("--log_path", type=str, default="./logs/")
+
+    parser.add_argument("--bs", type=int, default=16)
+    # parser.add_argument("--lr_de_st", type=float, default=0.4)
+    parser.add_argument("--lr_res", type=float, default=0.1)
+    parser.add_argument("--lr_seghead", type=float, default=0.01)
+    parser.add_argument("--steps", type=int, default=200)
+    parser.add_argument(
+        "--de_st_steps", type=int, default=1000
+    )  # steps of training the denoising student model
+    parser.add_argument("--eval_per_steps", type=int, default=5)
+    parser.add_argument("--log_per_steps", type=int, default=50)
+    parser.add_argument("--gamma", type=float, default=4)  # for focal loss
+    parser.add_argument("--T", type=int, default=100)  # for image-level inference
+
+    parser.add_argument(
+        "--custom_training_category", action="store_true", default=False
+    )
+    parser.add_argument("--no_rotation_category", nargs="*", type=str, default=list())
+    parser.add_argument(
+        "--slight_rotation_category", nargs="*", type=str, default=list()
+    )
+    parser.add_argument("--rotation_category", nargs="*", type=str, default=list())
+
+    args = parser.parse_args()
+
+    if args.custom_training_category:
+        no_rotation_category = args.no_rotation_category
+        slight_rotation_category = args.slight_rotation_category
+        rotation_category = args.rotation_category
+        # check
+        for category in (
+            no_rotation_category + slight_rotation_category + rotation_category
+        ):
+            assert category in ALL_CATEGORY
+    else:
+        no_rotation_category = [
+            "capsule",
+            "metal_nut",
+            "pill",
+            "toothbrush",
+            "transistor",
+            "screw",
+            "grid",
+        ]
+        slight_rotation_category = [
+            "wood",
+            "zipper",
+            "cable",
+            "transistor",
+            "screw",
+            "grid",
+        ]
+        rotation_category = [
+            "bottle",
+            "grid",
+            "hazelnut",
+            "leather",
+            "tile",
+            "carpet",
+            "screw",
+            "transistor",
+        ]
+
+    with torch.cuda.device(args.gpu_id):
+        for obj in no_rotation_category:
+            print(obj)
+            args.run_name_head = f"{args.run_name_head}_no_rotation"
+            train(args, obj)
+
+        for obj in slight_rotation_category:
+            print(obj)
+            args.run_name_head = f"{args.run_name_head}_slight_rotation"
+            train(args, obj, rotate_90=False, random_rotate=5)
+
+        for obj in rotation_category:
+            print(obj)
+            args.run_name_head = f"{args.run_name_head}_rotation"
+            train(args, obj, rotate_90=True, random_rotate=5)

@@ -7,10 +7,10 @@ def train(args, category, rotate_90=False, random_rotate=0):
     sam_mode = "train"
     twostream = Batch_SamE(sam_checkpoint,model_type,sam_mode,device)
 
-    sam_checkpoint = "./weights/mobile_sam.pt"
-    model_type = "vit_t"
+    sam_checkpoint = "./weights/sam_vit_h_4b8939.pth"
+    model_type = "vit_h"
     sam_mode = "eval"
-    fix_teacher = Batch_Sam(sam_checkpoint, model_type, sam_mode, device)
+    fix_teacher = Batch_Sam(sam_checkpoint,model_type,sam_mode,device)
 
     segmentation_net = SegmentationNet(512).cuda()
 

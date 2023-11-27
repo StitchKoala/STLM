@@ -1,6 +1,5 @@
 from bisect import bisect_left
 from typing import Any, Callable, List, Optional, Tuple
-
 import numpy as np
 import torch
 from anomalib.utils.metrics.plotting_utils import plot_figure

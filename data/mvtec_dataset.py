@@ -1,6 +1,5 @@
 import glob
 import os
-
 import numpy as np
 import torch
 import torchvision.transforms as transforms
@@ -9,8 +8,6 @@ from torch.utils.data import Dataset
 from mobile_sam.utils.transforms import ResizeLongestSide
 from data.data_utils import perlin_noise
 import cv2
-
-"""The scripts here are copied from DeSTSeg https://github.com/apple/ml-destseg"""
 
 def min_max_norm(image):
     a_min, a_max = image.min(), image.max()

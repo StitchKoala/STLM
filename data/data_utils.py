@@ -5,8 +5,6 @@ import imgaug.augmenters as iaa
 import numpy as np
 import torch
 
-"""The scripts here are copied from DRAEM: https://github.com/VitjanZ/DRAEM"""
-
 
 def lerp_np(x, y, w):
     fin_out = (y - x) * w + x

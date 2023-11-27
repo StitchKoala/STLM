@@ -16,7 +16,6 @@ from torchmetrics.utilities.data import dim_zero_cat
 
 
 class AUPRO(Metric):
-    """Area under per region overlap (AUPRO) Metric. Copy from anomalib: https://github.com/openvinotoolkit/anomalib"""
 
     is_differentiable: bool = False
     higher_is_better: Optional[bool] = None

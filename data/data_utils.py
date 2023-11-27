@@ -1,5 +1,4 @@
 import math
-
 import cv2
 import imgaug.augmenters as iaa
 import numpy as np

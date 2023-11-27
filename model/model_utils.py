@@ -7,8 +7,6 @@ from torch import Tensor
 import numpy as np
 import cv2
 
-"""The scripts here are copied from DeSTSeg https://github.com/apple/ml-destseg"""
-
 def conv3x3(
     in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1
 ) -> nn.Conv2d:
